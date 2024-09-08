@@ -1,0 +1,354 @@
+Start time at : 
+Pacific time 2024-08-26T22:48:18.096097+05:30
+Namespace(dataset='environment', pre_train='bert', hidden=64, dropout=0.1, norm=False, expID=0, epochs=100, batch_size=256, lr=2e-06, eps=1e-08, optim='adamw', cuda=True, gpu_id=0)
+loading training data
+loading testing data
+Waiting for preprocess data....
+Done!
+Waiting for saving processed data....
+Done!
+From processed data, there are :14286 training instances
+From processed data, there are :52 test instances
+Tokenizer Loaded!
+Dataset: environment
+Training samples: 14286
+Loading  train 14286
+56
+Dataset: environment
+Loading  test 209
+209
+Model Loaded!
+{'pre_train': 'bert', 'dataset': 'environment', 'expID': 0, 'epochs': 100, 'batch_size': 256, 'norm_CLS': False, 'lr': 2e-06, 'hidden': 64}
+Prediction starting.....
+
+Epoch: 0001  train_loss:29.22943 acc:0.05769 mrr:0.12519 wu_p:0.46757 epoch_time:104.6s remain_time:10355.6s
+Prediction starting.....
+
+Epoch: 0002  train_loss:6.89964 acc:0.09615 mrr:0.16732 wu_p:0.48642 epoch_time:104.4s remain_time:10240.0s
+Prediction starting.....
+
+Epoch: 0003  train_loss:3.94753 acc:0.13462 mrr:0.22456 wu_p:0.52424 epoch_time:104.4s remain_time:10133.3s
+Prediction starting.....
+
+Epoch: 0004  train_loss:2.84698 acc:0.19231 mrr:0.26582 wu_p:0.56712 epoch_time:104.5s remain_time:10029.1s
+Prediction starting.....
+
+Epoch: 0005  train_loss:2.15976 acc:0.19231 mrr:0.28606 wu_p:0.56926 epoch_time:104.7s remain_time:9928.9s
+Prediction starting.....
+
+Epoch: 0006  train_loss:1.81035 acc:0.21154 mrr:0.31788 wu_p:0.57247 epoch_time:104.4s remain_time:9822.9s
+Prediction starting.....
+
+Epoch: 0007  train_loss:1.44910 acc:0.21154 mrr:0.31888 wu_p:0.60017 epoch_time:104.5s remain_time:9718.5s
+Prediction starting.....
+
+Epoch: 0008  train_loss:1.15958 acc:0.21154 mrr:0.32891 wu_p:0.59028 epoch_time:104.7s remain_time:9615.8s
+Prediction starting.....
+
+Epoch: 0009  train_loss:1.02953 acc:0.25000 mrr:0.35361 wu_p:0.61102 epoch_time:104.4s remain_time:9509.9s
+Prediction starting.....
+
+Epoch: 0010  train_loss:0.91638 acc:0.25000 mrr:0.34474 wu_p:0.61578 epoch_time:104.4s remain_time:9404.1s
+Prediction starting.....
+
+Epoch: 0011  train_loss:0.76535 acc:0.26923 mrr:0.36192 wu_p:0.62888 epoch_time:104.3s remain_time:9298.4s
+Prediction starting.....
+
+Epoch: 0012  train_loss:0.69796 acc:0.26923 mrr:0.35172 wu_p:0.61990 epoch_time:104.5s remain_time:9194.0s
+Prediction starting.....
+
+Epoch: 0013  train_loss:0.63401 acc:0.25000 mrr:0.34383 wu_p:0.60159 epoch_time:104.5s remain_time:9089.8s
+Prediction starting.....
+
+Epoch: 0014  train_loss:0.57809 acc:0.25000 mrr:0.35586 wu_p:0.59976 epoch_time:104.7s remain_time:8986.5s
+Prediction starting.....
+
+Epoch: 0015  train_loss:0.50196 acc:0.26923 mrr:0.36829 wu_p:0.62723 epoch_time:104.4s remain_time:8881.7s
+Prediction starting.....
+
+Epoch: 0016  train_loss:0.46059 acc:0.25000 mrr:0.36235 wu_p:0.61697 epoch_time:104.4s remain_time:8776.8s
+Prediction starting.....
+
+Epoch: 0017  train_loss:0.42413 acc:0.23077 mrr:0.34802 wu_p:0.62125 epoch_time:104.4s remain_time:8671.8s
+Prediction starting.....
+
+Epoch: 0018  train_loss:0.36565 acc:0.19231 mrr:0.33516 wu_p:0.59606 epoch_time:104.5s remain_time:8567.3s
+Prediction starting.....
+
+Epoch: 0019  train_loss:0.37648 acc:0.23077 mrr:0.35853 wu_p:0.61520 epoch_time:104.6s remain_time:8463.2s
+Prediction starting.....
+
+Epoch: 0020  train_loss:0.35563 acc:0.21154 mrr:0.35280 wu_p:0.60238 epoch_time:104.7s remain_time:8359.5s
+Prediction starting.....
+
+Epoch: 0021  train_loss:0.30494 acc:0.21154 mrr:0.35908 wu_p:0.59988 epoch_time:104.5s remain_time:8254.9s
+Prediction starting.....
+
+Epoch: 0022  train_loss:0.31884 acc:0.26923 mrr:0.38292 wu_p:0.64649 epoch_time:104.5s remain_time:8150.3s
+Prediction starting.....
+
+Epoch: 0023  train_loss:0.29293 acc:0.28846 mrr:0.39876 wu_p:0.65601 epoch_time:104.4s remain_time:8045.5s
+Prediction starting.....
+
+Epoch: 0024  train_loss:0.26241 acc:0.28846 mrr:0.40237 wu_p:0.64853 epoch_time:104.4s remain_time:7940.7s
+Prediction starting.....
+
+Epoch: 0025  train_loss:0.26805 acc:0.26923 mrr:0.38757 wu_p:0.65299 epoch_time:104.6s remain_time:7836.5s
+Prediction starting.....
+
+Epoch: 0026  train_loss:0.24445 acc:0.26923 mrr:0.38317 wu_p:0.65198 epoch_time:104.5s remain_time:7732.2s
+Prediction starting.....
+
+Epoch: 0027  train_loss:0.21767 acc:0.28846 mrr:0.40610 wu_p:0.64750 epoch_time:104.5s remain_time:7627.8s
+Prediction starting.....
+
+Epoch: 0028  train_loss:0.20508 acc:0.26923 mrr:0.38986 wu_p:0.65382 epoch_time:104.5s remain_time:7523.2s
+Prediction starting.....
+
+Epoch: 0029  train_loss:0.18112 acc:0.32692 mrr:0.42254 wu_p:0.66311 epoch_time:104.6s remain_time:7419.0s
+Prediction starting.....
+
+Epoch: 0030  train_loss:0.17234 acc:0.30769 mrr:0.41274 wu_p:0.65844 epoch_time:104.4s remain_time:7314.2s
+Prediction starting.....
+
+Epoch: 0031  train_loss:0.17019 acc:0.28846 mrr:0.39602 wu_p:0.66673 epoch_time:104.4s remain_time:7209.5s
+Prediction starting.....
+
+Epoch: 0032  train_loss:0.15319 acc:0.30769 mrr:0.39799 wu_p:0.66508 epoch_time:104.5s remain_time:7105.1s
+Prediction starting.....
+
+Epoch: 0033  train_loss:0.16147 acc:0.30769 mrr:0.40355 wu_p:0.66883 epoch_time:104.5s remain_time:7000.6s
+Prediction starting.....
+
+Epoch: 0034  train_loss:0.14410 acc:0.30769 mrr:0.40811 wu_p:0.65926 epoch_time:104.7s remain_time:6896.5s
+Prediction starting.....
+
+Epoch: 0035  train_loss:0.15001 acc:0.28846 mrr:0.39630 wu_p:0.65661 epoch_time:104.5s remain_time:6792.0s
+Prediction starting.....
+
+Epoch: 0036  train_loss:0.13518 acc:0.28846 mrr:0.39774 wu_p:0.65707 epoch_time:104.5s remain_time:6687.5s
+Prediction starting.....
+
+Epoch: 0037  train_loss:0.12630 acc:0.28846 mrr:0.40538 wu_p:0.66219 epoch_time:104.4s remain_time:6582.9s
+Prediction starting.....
+
+Epoch: 0038  train_loss:0.12599 acc:0.28846 mrr:0.40652 wu_p:0.66302 epoch_time:104.6s remain_time:6478.7s
+Prediction starting.....
+
+Epoch: 0039  train_loss:0.11250 acc:0.34615 mrr:0.43921 wu_p:0.66453 epoch_time:104.5s remain_time:6374.2s
+Prediction starting.....
+
+Epoch: 0040  train_loss:0.10600 acc:0.32692 mrr:0.42209 wu_p:0.68184 epoch_time:104.5s remain_time:6269.8s
+Prediction starting.....
+
+Epoch: 0041  train_loss:0.10457 acc:0.28846 mrr:0.40383 wu_p:0.67259 epoch_time:104.5s remain_time:6165.3s
+Prediction starting.....
+
+Epoch: 0042  train_loss:0.09918 acc:0.28846 mrr:0.40263 wu_p:0.65894 epoch_time:104.5s remain_time:6060.8s
+Prediction starting.....
+
+Epoch: 0043  train_loss:0.09316 acc:0.30769 mrr:0.41340 wu_p:0.66206 epoch_time:104.6s remain_time:5956.4s
+Prediction starting.....
+
+Epoch: 0044  train_loss:0.10312 acc:0.30769 mrr:0.42058 wu_p:0.67415 epoch_time:104.4s remain_time:5851.7s
+Prediction starting.....
+
+Epoch: 0045  train_loss:0.08717 acc:0.32692 mrr:0.43249 wu_p:0.66343 epoch_time:104.5s remain_time:5747.2s
+Prediction starting.....
+
+Epoch: 0046  train_loss:0.07692 acc:0.32692 mrr:0.42775 wu_p:0.67570 epoch_time:104.5s remain_time:5642.6s
+Prediction starting.....
+
+Epoch: 0047  train_loss:0.08357 acc:0.32692 mrr:0.43165 wu_p:0.67982 epoch_time:104.7s remain_time:5538.4s
+Prediction starting.....
+
+Epoch: 0048  train_loss:0.07397 acc:0.30769 mrr:0.41858 wu_p:0.67685 epoch_time:104.5s remain_time:5433.9s
+Prediction starting.....
+
+Epoch: 0049  train_loss:0.07423 acc:0.34615 mrr:0.44002 wu_p:0.68197 epoch_time:104.4s remain_time:5329.3s
+Prediction starting.....
+
+Epoch: 0050  train_loss:0.06174 acc:0.34615 mrr:0.44384 wu_p:0.67428 epoch_time:104.3s remain_time:5224.6s
+Prediction starting.....
+
+Epoch: 0051  train_loss:0.05076 acc:0.32692 mrr:0.44188 wu_p:0.66723 epoch_time:104.4s remain_time:5120.1s
+Prediction starting.....
+
+Epoch: 0052  train_loss:0.06534 acc:0.34615 mrr:0.44407 wu_p:0.68133 epoch_time:104.6s remain_time:5015.7s
+Prediction starting.....
+
+Epoch: 0053  train_loss:0.05650 acc:0.30769 mrr:0.42094 wu_p:0.66677 epoch_time:104.4s remain_time:4911.1s
+Prediction starting.....
+
+Epoch: 0054  train_loss:0.06636 acc:0.30769 mrr:0.42123 wu_p:0.68449 epoch_time:104.5s remain_time:4806.6s
+Prediction starting.....
+
+Epoch: 0055  train_loss:0.05058 acc:0.32692 mrr:0.43110 wu_p:0.68005 epoch_time:104.5s remain_time:4702.1s
+Prediction starting.....
+
+Epoch: 0056  train_loss:0.05621 acc:0.32692 mrr:0.43070 wu_p:0.69219 epoch_time:104.5s remain_time:4597.6s
+Prediction starting.....
+
+Epoch: 0057  train_loss:0.04846 acc:0.32692 mrr:0.43171 wu_p:0.70139 epoch_time:104.3s remain_time:4493.0s
+Prediction starting.....
+
+Epoch: 0058  train_loss:0.04469 acc:0.34615 mrr:0.43776 wu_p:0.70920 epoch_time:104.3s remain_time:4388.4s
+Prediction starting.....
+
+Epoch: 0059  train_loss:0.04201 acc:0.32692 mrr:0.42880 wu_p:0.68143 epoch_time:104.4s remain_time:4283.9s
+Prediction starting.....
+
+Epoch: 0060  train_loss:0.03685 acc:0.34615 mrr:0.44574 wu_p:0.68260 epoch_time:104.4s remain_time:4179.4s
+Prediction starting.....
+
+Epoch: 0061  train_loss:0.03614 acc:0.32692 mrr:0.44139 wu_p:0.67454 epoch_time:104.4s remain_time:4074.8s
+Prediction starting.....
+
+Epoch: 0062  train_loss:0.04636 acc:0.32692 mrr:0.44124 wu_p:0.67097 epoch_time:104.6s remain_time:3970.4s
+Prediction starting.....
+
+Epoch: 0063  train_loss:0.04291 acc:0.32692 mrr:0.44071 wu_p:0.67250 epoch_time:104.4s remain_time:3865.9s
+Prediction starting.....
+
+Epoch: 0064  train_loss:0.03569 acc:0.32692 mrr:0.44619 wu_p:0.68132 epoch_time:104.3s remain_time:3761.3s
+Prediction starting.....
+
+Epoch: 0065  train_loss:0.03510 acc:0.36538 mrr:0.46101 wu_p:0.69771 epoch_time:104.4s remain_time:3656.8s
+Prediction starting.....
+
+Epoch: 0066  train_loss:0.03614 acc:0.36538 mrr:0.45701 wu_p:0.68681 epoch_time:104.4s remain_time:3552.3s
+Prediction starting.....
+
+Epoch: 0067  train_loss:0.03090 acc:0.30769 mrr:0.42145 wu_p:0.66957 epoch_time:104.6s remain_time:3447.8s
+Prediction starting.....
+
+Epoch: 0068  train_loss:0.03252 acc:0.32692 mrr:0.43381 wu_p:0.66897 epoch_time:104.4s remain_time:3343.3s
+Prediction starting.....
+
+Epoch: 0069  train_loss:0.03000 acc:0.28846 mrr:0.41206 wu_p:0.66938 epoch_time:104.3s remain_time:3238.8s
+Prediction starting.....
+
+Epoch: 0070  train_loss:0.02666 acc:0.30769 mrr:0.42666 wu_p:0.67222 epoch_time:104.4s remain_time:3134.2s
+Prediction starting.....
+
+Epoch: 0071  train_loss:0.02861 acc:0.30769 mrr:0.42599 wu_p:0.66645 epoch_time:104.5s remain_time:3029.8s
+Prediction starting.....
+
+Epoch: 0072  train_loss:0.02539 acc:0.32692 mrr:0.43800 wu_p:0.67628 epoch_time:104.4s remain_time:2925.3s
+Prediction starting.....
+
+Epoch: 0073  train_loss:0.02672 acc:0.30769 mrr:0.42558 wu_p:0.67564 epoch_time:104.4s remain_time:2820.8s
+Prediction starting.....
+
+Epoch: 0074  train_loss:0.02626 acc:0.30769 mrr:0.43487 wu_p:0.66274 epoch_time:104.4s remain_time:2716.3s
+Prediction starting.....
+
+Epoch: 0075  train_loss:0.02318 acc:0.28846 mrr:0.41612 wu_p:0.68120 epoch_time:104.3s remain_time:2611.7s
+Prediction starting.....
+
+Epoch: 0076  train_loss:0.02395 acc:0.28846 mrr:0.42196 wu_p:0.66073 epoch_time:104.4s remain_time:2507.2s
+Prediction starting.....
+
+Epoch: 0077  train_loss:0.02224 acc:0.30769 mrr:0.43187 wu_p:0.66824 epoch_time:104.6s remain_time:2402.8s
+Prediction starting.....
+
+Epoch: 0078  train_loss:0.02335 acc:0.30769 mrr:0.43481 wu_p:0.66774 epoch_time:104.4s remain_time:2298.3s
+Prediction starting.....
+
+Epoch: 0079  train_loss:0.02522 acc:0.36538 mrr:0.45642 wu_p:0.68292 epoch_time:104.4s remain_time:2193.8s
+Prediction starting.....
+
+Epoch: 0080  train_loss:0.02609 acc:0.32692 mrr:0.44004 wu_p:0.66200 epoch_time:104.4s remain_time:2089.4s
+Prediction starting.....
+
+Epoch: 0081  train_loss:0.01853 acc:0.36538 mrr:0.46319 wu_p:0.67546 epoch_time:104.4s remain_time:1984.9s
+Prediction starting.....
+
+Epoch: 0082  train_loss:0.02728 acc:0.32692 mrr:0.45069 wu_p:0.67795 epoch_time:104.6s remain_time:1880.4s
+Prediction starting.....
+
+Epoch: 0083  train_loss:0.01795 acc:0.32692 mrr:0.45080 wu_p:0.67328 epoch_time:104.3s remain_time:1775.9s
+Prediction starting.....
+
+Epoch: 0084  train_loss:0.01671 acc:0.34615 mrr:0.45596 wu_p:0.67541 epoch_time:104.3s remain_time:1671.4s
+Prediction starting.....
+
+Epoch: 0085  train_loss:0.01565 acc:0.34615 mrr:0.45841 wu_p:0.68829 epoch_time:104.4s remain_time:1567.0s
+Prediction starting.....
+
+Epoch: 0086  train_loss:0.01899 acc:0.32692 mrr:0.45023 wu_p:0.68562 epoch_time:104.6s remain_time:1462.5s
+Prediction starting.....
+
+Epoch: 0087  train_loss:0.01625 acc:0.32692 mrr:0.44390 wu_p:0.68013 epoch_time:104.3s remain_time:1358.0s
+Prediction starting.....
+
+Epoch: 0088  train_loss:0.01846 acc:0.32692 mrr:0.44868 wu_p:0.68184 epoch_time:104.3s remain_time:1253.5s
+Prediction starting.....
+
+Epoch: 0089  train_loss:0.01641 acc:0.32692 mrr:0.44502 wu_p:0.68562 epoch_time:104.3s remain_time:1149.0s
+Prediction starting.....
+
+Epoch: 0090  train_loss:0.01568 acc:0.34615 mrr:0.45580 wu_p:0.70375 epoch_time:104.3s remain_time:1044.6s
+Prediction starting.....
+
+Epoch: 0091  train_loss:0.01595 acc:0.30769 mrr:0.43968 wu_p:0.66282 epoch_time:104.3s remain_time:940.1s
+Prediction starting.....
+
+Epoch: 0092  train_loss:0.01612 acc:0.34615 mrr:0.44873 wu_p:0.67628 epoch_time:104.5s remain_time:835.6s
+Prediction starting.....
+
+Epoch: 0093  train_loss:0.01268 acc:0.38462 mrr:0.48077 wu_p:0.69487 epoch_time:104.3s remain_time:731.2s
+Prediction starting.....
+
+Epoch: 0094  train_loss:0.01392 acc:0.38462 mrr:0.47104 wu_p:0.69496 epoch_time:104.3s remain_time:626.7s
+Prediction starting.....
+
+Epoch: 0095  train_loss:0.01241 acc:0.34615 mrr:0.45857 wu_p:0.67628 epoch_time:104.3s remain_time:522.3s
+Prediction starting.....
+
+Epoch: 0096  train_loss:0.01159 acc:0.32692 mrr:0.45987 wu_p:0.67532 epoch_time:104.3s remain_time:417.8s
+Prediction starting.....
+
+Epoch: 0097  train_loss:0.01077 acc:0.32692 mrr:0.45600 wu_p:0.69432 epoch_time:104.4s remain_time:313.3s
+Prediction starting.....
+
+Epoch: 0098  train_loss:0.01217 acc:0.34615 mrr:0.46511 wu_p:0.69304 epoch_time:104.4s remain_time:208.9s
+Prediction starting.....
+
+Epoch: 0099  train_loss:0.01168 acc:0.36538 mrr:0.47860 wu_p:0.69359 epoch_time:104.4s remain_time:104.4s
+Prediction starting.....
+
+Epoch: 0100  train_loss:0.01111 acc:0.38462 mrr:0.48516 wu_p:0.70545 epoch_time:104.3s remain_time:0.0s
+Prediction starting.....
+Acc: 0.2692307692307692, MRR: 0.3820552176833108, Wu_P: 0.6252442002442001
+Time used :10466.6s
+End time at : 
+Pacific time 2024-08-27T01:42:44.679511+05:30
+************END***************
+Start time at : 
+Pacific time 2024-08-27T09:26:44.115461+05:30
+Namespace(dataset='environment', pre_train='bert', hidden=64, dropout=0.1, norm=False, wandb=False, expID=0, epochs=100, batch_size=256, lr=2e-06, eps=1e-08, optim='adamw', cuda=True, gpu_id=0)
+loading training data
+loading testing data
+Waiting for preprocess data....
+Done!
+Waiting for saving processed data....
+Done!
+From processed data, there are :14286 training instances
+From processed data, there are :52 test instances
+Tokenizer Loaded!
+Dataset: environment
+Training samples: 14286
+Loading  train 14286
+56
+Dataset: environment
+Loading  test 209
+209
+Model Loaded!
+{'pre_train': 'bert', 'dataset': 'environment', 'expID': 0, 'epochs': 100, 'batch_size': 256, 'norm_CLS': False, 'lr': 2e-06, 'hidden': 64}
+Prediction starting.....
+Acc: 0.38461538461538464, MRR: 0.48516339358895283, Wu_P: 0.705448717948718
+Time used :12.9s
+End time at : 
+Pacific time 2024-08-27T09:26:57.065430+05:30
+************END***************

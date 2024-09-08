@@ -1,0 +1,193 @@
+<<<<<<< HEAD
+# QuanTaxoMania
+
+### Quantum Representation of Taxonomy
+
+**QuanTaxoMania** is an innovative project designed to represent taxonomies using quantum principles. The tool encodes hierarchical taxonomic structures such as hypernyms and hyponyms into quantum states, leveraging the unique properties of quantum computing for efficient taxonomy analysis and classification.
+
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Examples](#examples)
+- [Quantum Theory Background](#quantum-theory-background)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Introduction
+
+Taxonomy is a fundamental aspect of knowledge representation, typically represented through hierarchical structures. **QuanTaxoMania** aims to merge taxonomy with quantum computing by providing a framework for representing and processing taxonomies in a quantum state space.
+
+This project is inspired by the challenges of large-scale taxonomy modeling, where the properties of quantum systems (superposition, entanglement, etc.) can offer computational advantages for tasks like classification, similarity computation, and taxonomic inference.
+
+## Features
+
+- Quantum encoding of taxonomic hierarchies
+- Support for taxonomic operations (hypernyms, hyponyms, part-whole relationships)
+- Quantum circuit generation for taxonomy traversal
+- Simulation on classical hardware using quantum libraries
+- Integration with quantum frameworks like Qiskit or Pennylane
+
+## Installation
+
+To run QuanTaxoMania locally, you will need to have Python and several dependencies installed. Follow the steps below to set up the project:
+
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/your-username/QuanTaxoMania.git
+    cd QuanTaxoMania
+    ```
+
+2. Create a virtual environment (optional but recommended):
+
+    ```bash
+    python3 -m venv venv
+    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    ```
+
+3. Install the required dependencies:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4. Install quantum libraries such as **Qiskit** or **Pennylane**:
+
+    ```bash
+    pip install qiskit pennylane
+    ```
+
+## Usage
+
+1. Import the necessary modules from the project:
+
+    ```python
+    from quantaxomania import QuantumTaxonomy
+    ```
+
+2. Load your taxonomy data:
+
+    ```python
+    taxonomy = QuantumTaxonomy('data/taxonomy.json')
+    ```
+
+3. Generate quantum representations:
+
+    ```python
+    quantum_state = taxonomy.encode()
+    ```
+
+4. Perform operations like taxonomy traversal, similarity measurement, or classification:
+
+    ```python
+    similarity = taxonomy.compute_similarity(term1, term2)
+    ```
+
+5. You can also simulate quantum circuits:
+
+    ```python
+    taxonomy.simulate_quantum_circuit()
+    ```
+
+For detailed instructions on the available methods and utilities, refer to the [Documentation](docs/documentation.md).
+
+## Examples
+
+Here are some examples of how to use **QuanTaxoMania** for practical tasks:
+
+- [Example 1: Taxonomy Encoding](examples/taxonomy_encoding.py)
+- [Example 2: Quantum Classification](examples/quantum_classification.py)
+- [Example 3: Similarity Calculation](examples/similarity_calculation.py)
+
+## Quantum Theory Background
+
+QuanTaxoMania relies on foundational concepts of quantum computing, such as:
+
+- **Quantum Superposition**: Encoding taxonomic elements as superpositions of states.
+- **Quantum Entanglement**: Capturing relationships (hypernym/hyponym) between elements.
+- **Quantum Measurement**: Inferring taxonomic classifications through quantum measurements.
+
+For users unfamiliar with quantum computing, we recommend reviewing basic quantum theory concepts before diving into the code.
+
+## Contributing
+
+Contributions are welcome! If you'd like to contribute to **QuanTaxoMania**, follow these steps:
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/your-feature`).
+3. Commit your changes (`git commit -am 'Add your feature'`).
+4. Push to the branch (`git push origin feature/your-feature`).
+5. Create a new Pull Request.
+
+For more details, check out the [CONTRIBUTING](CONTRIBUTING.md) guidelines.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+=======
+BoxTaxo
+-----------------
+This is the implementation of our paper "[A Single Vector Is Not Enough: Taxonomy Expansion via  Box Embeddings](https://songjiang0909.github.io/pdf/boxtaxo.pdf)", published in WWW'23.
+
+Data
+-----------------
+
+The original data used could be access from SemEval-2016 Task 13: Taxonomy Extraction Evaluation.
+
+We also provide our processed data under the `data` folder.  Credits to [repo](https://github.com/yueyu1030/STEAM)!
+
+
+Requirement
+----------------------
+All required packages could be found in `requirement.txt` (generated by `pip freeze`).
+
+
+
+How To Run?
+----------------------
+
+
+```bash
+cd ./src
+
+python main.py
+```
+
+Key Arguments Interpretation:
+
+- `--dataset`: Dataset option: environment or science.
+- `--embed_size`: Dimension of box embeddings.
+- `--margin` : Margin for containing loss ($\delta$ in paper).
+- `--epsilon`: Margin for negative contain ($\epsilon$ in paper).
+- `--size`:  Minimum box ($\phi$ in paper).
+
+
+
+The results (log, predictions, learned boxes) are stored under the `result` folder.
+
+
+
+
+Contact
+----------------------
+Song Jiang <songjiang@cs.ucla.edu>
+
+
+
+Bibtex
+----------------------
+
+```bibtex
+@inproceedings{boxtaxo,
+  title={A Single Vector Is Not Enough: Taxonomy Expansion via  Box Embeddings},
+  author={Song Jiang, Qiyue Yao, Qifan Wang, Yizhou Sun},
+  booktitle={Proceedings of The Web Conference},
+  year={2023}
+}
+```
+
+
+>>>>>>> eacfdd4 (First Commit)
