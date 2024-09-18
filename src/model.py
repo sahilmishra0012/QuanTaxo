@@ -4,7 +4,7 @@ import torch
 import sys
 import torch.nn as nn
 from utils import *
-from layers import MLP_VEC, NormalisedWeights
+from layers import MLP_VEC, NormalisedWeights, Observation
 from transformers import BertModel
 
 
@@ -31,7 +31,8 @@ class BoxEmbed(nn.Module):
         # self.sumparam = LINEAR_ONE(input_dim = 768) #bias=True by default
         self.mixwt = NormalisedWeights(input_dim=self.args.padmaxlen, mixturetype=self.args.mixture)
         self.logits = MLP_VEC(input_dim=(768+1),hidden=self.args.hidden,output_dim=1)
-
+        self.observable = Observation(num_obs=64)
+        self.cosineloss = nn.CosineEmbeddingLoss()
         self.dropout = nn.Dropout(self.args.dropout)
         self.classfn_loss = nn.BCELoss()
 
@@ -40,7 +41,6 @@ class BoxEmbed(nn.Module):
             data = pkl.load(f)
         
         return data
-
 
     def __load_pre_trained__(self):
         model = BertModel.from_pretrained("bert-base-uncased")
@@ -59,29 +59,62 @@ class BoxEmbed(nn.Module):
     def get_unit_trace(self, matrixbatch):
         trace = torch.einsum('bii->b',matrixbatch)
         matrixbatch_normalised = matrixbatch/trace.unsqueeze(-1).unsqueeze(-1)
-        checktrace = torch.einsum('bii->b',matrixbatch_normalised)
+        # checktrace = torch.einsum('bii->b',matrixbatch_normalised)
         # print("Check Trace:", checktrace)
         return matrixbatch_normalised
+    
+    def get_observation(self, matrixbatch):
+        return self.observable(matrixbatch)
 
-    def get_logits(self, norm_child, norm_parent):
-        # Superposition, using simply [CLS]
-        query_c = torch.einsum('bi,bj->bij', norm_child, norm_child) # Outer product to get the matrices rho_a
-        # print("Query_C:", self.check_pd(query_c))
-        query_c = self.get_unit_trace(query_c)
-        query_p = torch.einsum('bi,bj->bij', norm_parent, norm_parent) # Outer product to get the matrices rho_p
-        # print("Query_P:", self.check_pd(query_p))
-        query_p = self.get_unit_trace(query_p)
-        mat = torch.matmul(query_c, query_p)
+    # def get_logits(self, norm_child, norm_parent):
+    #     query_c = torch.einsum('bi,bj->bij', norm_child, norm_child) # Outer product to get the matrices rho_a
+    #     # print("Query_C:", self.check_pd(query_c))
+    #     if self.args.unitary:
+    #         query_c = self.get_unit_trace(query_c)
+    #     query_p = torch.einsum('bi,bj->bij', norm_parent, norm_parent) # Outer product to get the matrices rho_p
+    #     # print("Query_P:", self.check_pd(query_p))
+    #     if self.args.unitary:
+    #         query_p = self.get_unit_trace(query_p)
+    #     mat = torch.matmul(query_c, query_p)
 
-        trace = mat.diagonal(dim1=-2, dim2=-1).sum(dim=-1)
-        xfeat = torch.cat((trace.view(len(trace),1), mat.diagonal(dim1=-2,dim2=-1)), dim=-1)
-        logits = self.logits(xfeat)
-        return logits
+    #     trace = mat.diagonal(dim1=-2, dim2=-1).sum(dim=-1)
+    #     xfeat = torch.cat((trace.view(len(trace),1), mat.diagonal(dim1=-2,dim2=-1)), dim=-1)
+    #     logits = self.logits(xfeat)
+    #     return logits
 
     def get_bert_logits(self, enc_q, enc_cand):
         xfeat = torch.cat((enc_q, enc_cand),dim=-1)
         logits = self.bert_logits(xfeat)
         return logits
+    
+    def get_logits(self, norm_child, norm_parent):
+        mat = torch.matmul(norm_child, norm_parent)
+        trace = mat.diagonal(dim1=-2, dim2=-1).sum(dim=-1)
+        xfeat = torch.cat((trace.view(len(trace),1), mat.diagonal(dim1=-2,dim2=-1)), dim=-1)
+        logits = self.logits(xfeat)
+        return logits
+
+    def get_density_matrices(self, encode_inputs):
+        cls = self.pre_train_model(**encode_inputs)
+        if self.args.mixture is not None:
+            output = cls[0]
+            # print("Shape of output w/ CLS: ",output.size())
+            weights = self.mixwt(output)
+            weighted_sum = torch.einsum('bik,bil,i->bkl',output,output, weights)
+            # print("Dens mat shape: ",weighted_sum.size())
+            if self.args.unitary:
+                weighted_sum = self.get_unit_trace(weighted_sum)
+            return weighted_sum
+        else:
+            output = self.dropout(cls[0][:, 0, :]) # Extract CLS embedding for all elements in the batch
+            if self.args.pooled:
+                pooled = cls[1]
+                output = self.dropout(pooled)
+
+            dens_mat = torch.einsum('bi,bj->bij', output, output) # Outer product to get the matrices rho_a
+            if self.args.unitary:
+                dens_mat = self.get_unit_trace(dens_mat)
+            return dens_mat
 
     def projection_cls(self,encode_inputs):
         cls = self.pre_train_model(**encode_inputs)
@@ -98,7 +131,7 @@ class BoxEmbed(nn.Module):
             if self.args.pooled:
                 pooled = cls[1]
                 output = self.dropout(pooled)
-        # print(output.size())
+        print(output.size())
 
         # # TO-DO, Rescale the embeddings
         # print(torch.norm(cls,dim=-1))
@@ -114,20 +147,34 @@ class BoxEmbed(nn.Module):
     def classfn_score(self, norm_query, norm_candidate):
         return self.get_logits(norm_query, norm_candidate)
 
-    def forward(self,encode_parent=None,encode_child=None,encode_negative_parents=None,flag="train"):
+    def forward(self,encode_parent=None,encode_child=None,encode_negative_parents=None,flag="trace"):
 
-        par_cls = self.projection_cls(encode_parent)
-        child_cls = self.projection_cls(encode_child)
-        positive_logits = self.get_logits(child_cls, par_cls)
-        # positive_logits = self.get_bert_logits(child_cls, par_cls)
+        # par_cls = self.projection_cls(encode_parent)
+        # child_cls = self.projection_cls(encode_child)
+        # neg_par_cls = self.projection_cls(encode_negative_parents)
+        par_cls = self.get_density_matrices(encode_parent)
+        child_cls = self.get_density_matrices(encode_child)
+        neg_par_cls = self.get_density_matrices(encode_negative_parents)
 
-        neg_par_cls = self.projection_cls(encode_negative_parents)
-        negative_logits = self.get_logits(child_cls,neg_par_cls)
-        # negative_logits = self.get_bert_logits(child_cls,neg_par_cls)
-        ones = torch.ones_like(positive_logits)
-        zeros = torch.zeros_like(negative_logits)
-        positive_loss = self.classfn_loss(positive_logits,ones)
-        negative_loss = self.classfn_loss(negative_logits,zeros)
+        if flag=="trace":
+            positive_logits = self.get_logits(child_cls, par_cls)
+            # positive_logits = self.get_bert_logits(child_cls, par_cls)
+            negative_logits = self.get_logits(child_cls,neg_par_cls)
+            # negative_logits = self.get_bert_logits(child_cls,neg_par_cls)
+            ones = torch.ones_like(positive_logits)
+            zeros = torch.zeros_like(negative_logits)
+            positive_loss = self.classfn_loss(positive_logits,ones)
+            negative_loss = self.classfn_loss(negative_logits,zeros)
+        else:
+            par_obs = self.get_observation(par_cls)
+            child_obs = self.get_observation(child_cls)
+            neg_par_obs = self.get_observation(neg_par_cls)
+            num_samples = par_obs.shape[0]
+            ones = torch.ones(num_samples)
+            positive_loss = self.cosineloss(par_obs, child_obs, ones)
+            negative_loss = self.cosineloss(neg_par_obs, child_obs, (-1)*ones)
+            positive_loss = positive_loss.sum()
+            negative_loss = negative_loss.sum()
 
         loss = positive_loss + negative_loss
 

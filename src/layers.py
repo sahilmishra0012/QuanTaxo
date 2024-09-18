@@ -41,7 +41,7 @@ class NormalisedWeights(nn.Module):
         if mixturetype == "random":
             self.weights = nn.Parameter(torch.randn(input_dim))
         elif mixturetype == "constant":
-            self.weights = nn.Parameter(torch.ones(input_dim))
+            self.weights = torch.ones(input_dim).cuda()
         elif mixturetype == "uniform":
             self.weights = nn.Parameter(torch.empty(input_dim).uniform_(-1,1))
         elif mixturetype == "self_attention":
@@ -50,8 +50,8 @@ class NormalisedWeights(nn.Module):
         elif mixturetype == "nn":
             self.weights = nn.Parameter(torch.randn(input_dim))
             self.ann = nn.Linear(input_dim, input_dim, bias=True)
-        elif mixturetype == "qen":
-            self.weights = 0
+        elif mixturetype == "gaussian":
+            self.weights = nn.Parameter(torch.empty(input_dim).normal_(0,1))
         self.lrelu = nn.LeakyReLU(negative_slope=0.02)
         self.fc1 = nn.Softmax(dim=-1)
 
@@ -81,15 +81,16 @@ class NormalisedWeights(nn.Module):
         elif self.type=="nn":
             weights = self.ann(self.weights)
             weights = self.fc1(weights)
-            weighted_sum_batch = torch.einsum('bij,i->bj', x, weights)
+            # weighted_sum_batch = torch.einsum('bij,i->bj', x, weights)
+            # print(weighted_sum_batch.shape)
         else:
             weights = self.fc1(self.weights) # Get the weights sum to 1
             # print(weights,"\nand sum = ",weights.sum())
             assert(x.shape[1]==weights.shape[0])
-            weighted_sum_batch = torch.einsum('bij,i->bj', x, weights)
-            # print(x.shape)
-            print(weighted_sum_batch.shape)
-        return weighted_sum_batch
+            # weighted_sum_batch = torch.einsum('bij,i->bj', x, weights)
+            # print(weighted_sum_batch.shape)
+        # return weighted_sum_batch
+        return weights
 
 
 class LINEAR_ONE(nn.Module):
@@ -105,3 +106,13 @@ class LINEAR_ONE(nn.Module):
         x = torch.outer(x,x) # Construct the density matrix for each 
         x = F.linear(x,y)
         return x
+
+class Observation(nn.Module):
+    def __init__(self, num_obs=64):
+        super(Observation, self).__init__()
+        self.weights = nn.Parameter(torch.empty(num_obs, 768).uniform_(-1,1))
+    
+    def forward(self, x):
+        # x is a batch of density matrices
+        output = torch.einsum('ki,bij,kj->bk',self.weights,x,self.weights)
+        return output

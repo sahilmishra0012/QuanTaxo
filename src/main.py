@@ -19,6 +19,8 @@ parser.add_argument('--word',type=bool, default=False, help="Word [SEP] Definiti
 parser.add_argument('--pooled',type=bool, default=False, help="Use pooled output instead of [CLS] token")
 parser.add_argument('--mixture',type=str, default=None, help="Type of weighting in mixture model")
 parser.add_argument('--padmaxlen', type=int, default=128, help='max length of padding')
+parser.add_argument('--unitary', type=int, default=0, help='unitary trace')
+parser.add_argument('--score', type=str, default="trace", help="Which scoring function to use: trace or obs")
 
 ## Training hyper-parameters
 parser.add_argument('--expID', type=int, default=0, help='-th of experiments')
