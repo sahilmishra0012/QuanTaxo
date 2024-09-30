@@ -1,6 +1,7 @@
 import os
 import pickle as pkl
 import torch
+import numpy as np
 import sys
 import torch.nn as nn
 from utils import *
@@ -8,9 +9,9 @@ from layers import MLP_VEC, NormalisedWeights, Observation
 from transformers import BertModel
 
 
-class BoxEmbed(nn.Module):
+class QuanTaxo(nn.Module):
     def __init__(self,args,tokenizer):
-        super(BoxEmbed, self).__init__()
+        super(QuanTaxo, self).__init__()
 
         self.args = args
         self.data = self.__load_data__(self.args.dataset)
@@ -29,10 +30,10 @@ class BoxEmbed(nn.Module):
 
         self.pre_train_model = self.__load_pre_trained__()
         # self.sumparam = LINEAR_ONE(input_dim = 768) #bias=True by default
-        self.mixwt = NormalisedWeights(input_dim=self.args.padmaxlen, mixturetype=self.args.mixture)
+        self.mixwt = NormalisedWeights(input_dim=128, mixturetype=self.args.mixture)
         self.logits = MLP_VEC(input_dim=(768+1),hidden=self.args.hidden,output_dim=1)
-        self.observable = Observation(num_obs=64)
-        self.cosineloss = nn.CosineEmbeddingLoss()
+        # self.observable = Observation(num_obs=128)
+        # self.cosineloss = nn.CosineEmbeddingLoss(reduction="sum")
         self.dropout = nn.Dropout(self.args.dropout)
         self.classfn_loss = nn.BCELoss()
 
@@ -43,7 +44,11 @@ class BoxEmbed(nn.Module):
         return data
 
     def __load_pre_trained__(self):
-        model = BertModel.from_pretrained("bert-base-uncased")
+        pre_trained_dic = {"bert": [BertModel,"bert-base-uncased"]}
+        local_directory = "/home/avi/.cache/huggingface/hub/models--bert-base-uncased/snapshots/86b5e0934494bd15c9632b12f734a8a67f723594"
+        pre_train_model, checkpoint = pre_trained_dic[self.args.pre_train]
+        model = pre_train_model.from_pretrained(local_directory)
+        # model = BertModel.from_pretrained("bert-base-uncased")
         print("Model Loaded!")
         return model
 
@@ -94,12 +99,14 @@ class BoxEmbed(nn.Module):
         logits = self.logits(xfeat)
         return logits
 
-    def get_density_matrices(self, encode_inputs):
+    def get_density_matrices(self, encode_inputs, printit=None):
         cls = self.pre_train_model(**encode_inputs)
         if self.args.mixture is not None:
             output = cls[0]
             # print("Shape of output w/ CLS: ",output.size())
             weights = self.mixwt(output)
+            if printit:
+                np.savetxt("weights.csv",weights.cpu(),delimiter=",",fmt="%.4e")
             weighted_sum = torch.einsum('bik,bil,i->bkl',output,output, weights)
             # print("Dens mat shape: ",weighted_sum.size())
             if self.args.unitary:
@@ -119,7 +126,7 @@ class BoxEmbed(nn.Module):
     def projection_cls(self,encode_inputs):
         cls = self.pre_train_model(**encode_inputs)
         if self.args.mixture is not None:
-            output = cls[0]
+            output = cls[0][:,1:,:]
             # print("Start of mix:", output.size())
             # if self.args.mixture=="constant":
             #     output = output.mean(dim=1)
@@ -131,17 +138,7 @@ class BoxEmbed(nn.Module):
             if self.args.pooled:
                 pooled = cls[1]
                 output = self.dropout(pooled)
-        print(output.size())
-
-        # # TO-DO, Rescale the embeddings
-        # print(torch.norm(cls,dim=-1))
-        # norms = torch.norm(cls, dim=1, keepdim=True)
-        # epsilon = 1e-8
-        # norms = norms + epsilon
-        # y = cls/norms
-        # print(torch.norm(y,dim=-1))
-        # print(y.size())
-        # sys.exit(0)
+        # print(output.size())
         return output
 
     def classfn_score(self, norm_query, norm_candidate):
@@ -149,9 +146,6 @@ class BoxEmbed(nn.Module):
 
     def forward(self,encode_parent=None,encode_child=None,encode_negative_parents=None,flag="trace"):
 
-        # par_cls = self.projection_cls(encode_parent)
-        # child_cls = self.projection_cls(encode_child)
-        # neg_par_cls = self.projection_cls(encode_negative_parents)
         par_cls = self.get_density_matrices(encode_parent)
         child_cls = self.get_density_matrices(encode_child)
         neg_par_cls = self.get_density_matrices(encode_negative_parents)

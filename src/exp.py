@@ -9,9 +9,12 @@ from torch import optim
 from transformers import BertTokenizer
 from utils import *
 from data import *
-from model import BoxEmbed
+from model import QuanTaxo
+from complex import ComplexQTaxo
 
 import wandb
+
+os.environ["WANDB_MODE"] = "offline"
 
 class Experiments(object):
 
@@ -23,11 +26,16 @@ class Experiments(object):
         self.train_loader,self.train_set = load_data(self.args, self.tokenizer,"train")
         self.test_loader,self.test_set = load_data(self.args, self.tokenizer,"test")
         
-        self.model = BoxEmbed(args,self.tokenizer)
+        if self.args.complex:
+            self.model = ComplexQTaxo(args,self.tokenizer)
+        else:
+            self.model = QuanTaxo(args,self.tokenizer)
+        
         self.optimizer = self._select_optimizer()
         self._set_device()
         # self.exp_setting= str(self.args.pre_train)+"_"+str(self.args.dataset)+"_"+str(self.args.expID)+"_"+str(self.args.epochs)+"_"+str(self.args.batch_size)
-        self.exp_setting= "_".join([str(elem) for elem in [self.args.pre_train,self.args.dataset,self.args.expID,self.args.epochs,self.args.batch_size,self.args.mixture if self.args.mixture else "superposn", self.args.lr]])
+        # self.exp_setting= "_".join([str(elem) for elem in [self.args.pre_train,self.args.dataset,self.args.expID,self.args.epochs,self.args.batch_size,self.args.norm,self.args.pooled,self.args.mixture]])
+        self.exp_setting= "_".join([str(elem) for elem in [self.args.pre_train,self.args.dataset,self.args.expID,self.args.epochs,self.args.batch_size,self.args.mixture if self.args.mixture else "superposn", self.args.lr,self.args.score,"complex" if self.args.complex else "real"]])
         
         setting={
             "pre_train":self.args.pre_train,
@@ -35,13 +43,15 @@ class Experiments(object):
             "expID":self.args.expID,
             "epochs":self.args.epochs,
             "batch_size":self.args.batch_size,
-            "norm_CLS":self.args.norm,
+            # "norm_CLS":self.args.norm,
             "lr":self.args.lr,
             "hidden":self.args.hidden,
-            "[SEP]":self.args.word,
-            "pooled":self.args.pooled,
+            # "[SEP]":self.args.word,
+            # "pooled":self.args.pooled,
             "mixture":self.args.mixture if self.args.mixture else "superposn",
-            "unit_trace":self.args.unitary,
+            # "unit_trace":self.args.unitary,
+            "score_fn":self.args.score,
+            "complex":self.args.complex
         }
         print(setting)
 
@@ -50,7 +60,11 @@ class Experiments(object):
 
 
     def __load_tokenizer__(self):
-        tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+        pre_trained_dic = {"bert": [BertTokenizer,"bert-base-uncased"]}
+        local_directory = "/home/avi/.cache/huggingface/hub/models--bert-base-uncased/snapshots/86b5e0934494bd15c9632b12f734a8a67f723594"
+        pre_train_tokenizer, checkpoint = pre_trained_dic[self.args.pre_train]
+        tokenizer = pre_train_tokenizer.from_pretrained(local_directory) #checkpoint)
+        # tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         print("Tokenizer Loaded!")
         return tokenizer
 
@@ -90,9 +104,17 @@ class Experiments(object):
 
         limit=1
         if(self.args.dataset=='environment'):
-            limit = 0.46
+            limit=0.48
+            if self.args.complex:
+                limit = 0.57
         elif self.args.dataset=='science':
-            limit = 0.52
+            limit = 0.56
+            if self.args.complex:
+                limit = 0.76
+        elif self.args.dataset=='food':
+            limit=0.45
+            if self.args.complex:
+                limit=0.56
         
         for epoch in tqdm(range(self.args.epochs)):
             epoch_time = time.time()
@@ -140,21 +162,27 @@ class Experiments(object):
                     'NDCG':(test_metrics["NDCG"]),
                 })
 
+            torch.save(self.model.state_dict(), os.path.join("../result",self.args.dataset,"train","exp_model_"+self.exp_setting+"_"+str(epoch)+".checkpoint")) 
+            if epoch:
+                os.remove(os.path.join("../result",self.args.dataset,"train","exp_model_"+self.exp_setting+"_"+str((epoch-1))+".checkpoint"))
             if test_acc>=limit:
                 break
-        # Use the model in final epoch
-        # torch.save(self.model.state_dict(), os.path.join("../result",self.args.dataset,"model","exp_model_"+self.exp_setting+".checkpoint"))            
 
-
-    def predict(self, tag=None):
+    def predict(self, tag=None, path=None):
+        # state_dict = self.model.state_dict()
+        # for param_tensor in state_dict:
+        #     print(f"Parameter name: {param_tensor} \tShape: {state_dict[param_tensor].size()}")
         print ("Prediction starting.....")
         if(tag=="test"):
-            self.model.load_state_dict(torch.load(f"/home/avi/BoxTaxo_QLM/result/{self.args.dataset}/model/exp_model_{self.exp_setting}.checkpoint"))
+            if path:
+                self.model.load_state_dict(torch.load(f"{path}"))
+            else:
+                self.model.load_state_dict(torch.load(f"/home/avi/BoxTaxo_QLM/result/{self.args.dataset}/model/exp_model_{self.exp_setting}.checkpoint"))
         self.model.eval()
         with torch.no_grad():
             score_list = []
             gt_label = self.test_set.test_gt_id
-            query = self.model.get_density_matrices(self.test_set.encode_query)
+            query = self.model.get_density_matrices(self.test_set.encode_query, printit=tag)
             candidates = []
             for j, (encode_candidate) in enumerate(self.test_loader):
                 candidate_center = self.model.get_density_matrices(encode_candidate)
@@ -169,6 +197,7 @@ class Experiments(object):
                 score_list.extend([score])
             score_list = torch.stack(score_list,0)
             sorted_scores, indices = score_list.squeeze().sort(dim=1,descending=True)
+            print(sorted_scores[:,:5])
             test_metrics = metrics(indices, gt_label, self.train_set.train_concept_set, self.test_set.path2root)
 
         if(tag=="test"):

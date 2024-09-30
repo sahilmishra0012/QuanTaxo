@@ -21,6 +21,7 @@ parser.add_argument('--mixture',type=str, default=None, help="Type of weighting 
 parser.add_argument('--padmaxlen', type=int, default=128, help='max length of padding')
 parser.add_argument('--unitary', type=int, default=0, help='unitary trace')
 parser.add_argument('--score', type=str, default="trace", help="Which scoring function to use: trace or obs")
+parser.add_argument('--complex',type=bool, default=False, help="Complex Quantum Taxo")
 
 ## Training hyper-parameters
 parser.add_argument('--expID', type=int, default=0, help='-th of experiments')
@@ -43,6 +44,7 @@ args = parser.parse_args()
 args.cuda = True if torch.cuda.is_available() and args.cuda else False
 if args.cuda:
     torch.cuda.set_device(args.gpu_id)
+    # print(torch.cuda.current_device())
 
 print(args)
 

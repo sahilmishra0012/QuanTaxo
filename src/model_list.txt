@@ -1,0 +1,7 @@
+"/home/avi/BoxTaxo_QLM/result/science/model/exp_model_bert_science_0_100_128_superposn_2e-05_trace_complex.checkpoint"
+Superposition w/ Complex Values on Environment
+
+"/home/avi/BoxTaxo_QLM/result/environment/model/exp_model_bert_environment_0_100_128_constant_2e-05_trace_complex.checkpoint"
+Mixture Constant w/ Complex Values on Environment
+
+

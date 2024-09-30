@@ -27,7 +27,8 @@ def accuracy(pred, gt):
     preds = np.array(list(pred[:,0]))
     gts = np.array(list(gt))
     acc = np.sum(preds==gts)/len(gt)
-
+    print("Predictions: ",preds)
+    print("GT: ",gts)
     return acc
 
 def precision_k(pred, gt,k):

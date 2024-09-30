@@ -13,14 +13,21 @@ parser.add_argument('--dataset', type=str, default='environment', help='dataset'
 parser.add_argument('--pre_train', type=str, default="bert", help='Pre_trained model')
 parser.add_argument('--hidden', type=int, default=64, help='dimension of hidden layers in MLP')
 parser.add_argument('--dropout', type=float, default=0.1, help='dropout')
-parser.add_argument('--norm',type=bool,default=False,help="Normalise [CLS] vectors")
-parser.add_argument('--wandb',type=bool,default=False,help="Enable wandb logging")
-
+parser.add_argument('--norm',type=bool, default=False, help="Normalise [CLS] vectors")
+parser.add_argument('--wandb',type=int, default=0, help="Enable wandb logging")
+parser.add_argument('--word',type=bool, default=False, help="Word [SEP] Definition instead of Word: Definition")
+parser.add_argument('--pooled',type=bool, default=False, help="Use pooled output instead of [CLS] token")
+parser.add_argument('--mixture',type=str, default=None, help="Type of weighting in mixture model")
+parser.add_argument('--padmaxlen', type=int, default=128, help='max length of padding')
+parser.add_argument('--unitary', type=int, default=0, help='unitary trace')
+parser.add_argument('--score', type=str, default="trace", help="Which scoring function to use: trace or obs")
+parser.add_argument('--complex',type=bool, default=False, help="Complex Quantum Taxo")
+parser.add_argument('--path',type=str,default=None,help="Path to saved model checkpoint")
 
 ## Training hyper-parameters
 parser.add_argument('--expID', type=int, default=0, help='-th of experiments')
 parser.add_argument('--epochs', type=int, default=100, help='training epochs')
-parser.add_argument('--batch_size', type=int, default=256, help='training batch size')
+parser.add_argument('--batch_size', type=int, default=128, help='training batch size')
 parser.add_argument('--lr', type=float, default=2e-5, help='learning rate for pre-trained model')
 # parser.add_argument('--lr_projection', type=float, default=1e-3, help='learning rate for projection layers')
 parser.add_argument('--eps', type=float, default=1e-8, help='adamw_epsilon')
@@ -49,7 +56,7 @@ exp = Experiments(args)
 
 """Train the model"""
 # exp.train()
-exp.predict(tag="test")
+exp.predict(tag="test", path=args.path)
 # exp.save_prediction()
 
 print ("Time used :{:.01f}s".format(time.time()-start_time))

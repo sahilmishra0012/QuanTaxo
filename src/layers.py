@@ -33,11 +33,23 @@ class MLP_VEC(nn.Module):
         x = self.sig(x)
         return x
     
+class PhaseEmbeddings(nn.Module):
+    def __init__(self, embed_dim):
+        super(PhaseEmbeddings,self).__init__()
+        self.weights = nn.Parameter(torch.empty(embed_dim,2).uniform_(-1,1)) # Generates a 128 by 768 by 2 dim matrix
+        self.sftmx = nn.Softmax(dim=-1)
+    
+    def forward(self):
+        phase = self.sftmx(self.weights)
+        phase = torch.view_as_complex(phase)
+        return phase
+        
 class NormalisedWeights(nn.Module):
-    def __init__(self, input_dim, mixturetype=None):
+    def __init__(self, input_dim, mixturetype=None, modeltype=None):
         super(NormalisedWeights,self).__init__()
         self.type = mixturetype
         self.input_dim = input_dim
+        self.valspace = "complex" if modeltype else "real"
         if mixturetype == "random":
             self.weights = nn.Parameter(torch.randn(input_dim))
         elif mixturetype == "constant":
@@ -47,12 +59,12 @@ class NormalisedWeights(nn.Module):
         elif mixturetype == "self_attention":
             self.weights = nn.Parameter(torch.empty((input_dim//2,768)))
             self.a = nn.Parameter(torch.empty(input_dim))
-        elif mixturetype == "nn":
-            self.weights = nn.Parameter(torch.randn(input_dim))
-            self.ann = nn.Linear(input_dim, input_dim, bias=True)
-        elif mixturetype == "gaussian":
-            self.weights = nn.Parameter(torch.empty(input_dim).normal_(0,1))
-        self.lrelu = nn.LeakyReLU(negative_slope=0.02)
+        # elif mixturetype == "nn":
+        #     self.weights = nn.Parameter(torch.randn(input_dim))
+        #     self.ann = nn.Linear(input_dim, input_dim, bias=True)
+        # elif mixturetype == "gaussian":
+        #     self.weights = nn.Parameter(torch.empty(input_dim).normal_(0,1))
+        # self.lrelu = nn.LeakyReLU(negative_slope=0.02)
         self.fc1 = nn.Softmax(dim=-1)
 
     def forward(self,x):
@@ -89,6 +101,8 @@ class NormalisedWeights(nn.Module):
             assert(x.shape[1]==weights.shape[0])
             # weighted_sum_batch = torch.einsum('bij,i->bj', x, weights)
             # print(weighted_sum_batch.shape)
+            if self.valspace=="complex":
+                weights = torch.sqrt(weights)
         # return weighted_sum_batch
         return weights
 

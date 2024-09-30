@@ -1,3 +1,4 @@
 src/wandb/
 old_src/
+old_data/
 src/__pycache__/
