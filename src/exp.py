@@ -14,10 +14,9 @@ from complex import ComplexQTaxo
 
 import wandb
 
-os.environ["WANDB_MODE"] = "offline"
+# os.environ["WANDB_MODE"] = "offline"
 
 class Experiments(object):
-
     def __init__(self,args):
         super(Experiments,self).__init__()
         
@@ -33,8 +32,6 @@ class Experiments(object):
         
         self.optimizer = self._select_optimizer()
         self._set_device()
-        # self.exp_setting= str(self.args.pre_train)+"_"+str(self.args.dataset)+"_"+str(self.args.expID)+"_"+str(self.args.epochs)+"_"+str(self.args.batch_size)
-        # self.exp_setting= "_".join([str(elem) for elem in [self.args.pre_train,self.args.dataset,self.args.expID,self.args.epochs,self.args.batch_size,self.args.norm,self.args.pooled,self.args.mixture]])
         self.exp_setting= "_".join([str(elem) for elem in [self.args.pre_train,self.args.dataset,self.args.expID,self.args.epochs,self.args.batch_size,self.args.mixture if self.args.mixture else "superposn", self.args.lr,self.args.score,"complex" if self.args.complex else "real"]])
         
         setting={
@@ -43,13 +40,9 @@ class Experiments(object):
             "expID":self.args.expID,
             "epochs":self.args.epochs,
             "batch_size":self.args.batch_size,
-            # "norm_CLS":self.args.norm,
             "lr":self.args.lr,
             "hidden":self.args.hidden,
-            # "[SEP]":self.args.word,
-            # "pooled":self.args.pooled,
             "mixture":self.args.mixture if self.args.mixture else "superposn",
-            # "unit_trace":self.args.unitary,
             "score_fn":self.args.score,
             "complex":self.args.complex
         }
@@ -60,11 +53,7 @@ class Experiments(object):
 
 
     def __load_tokenizer__(self):
-        pre_trained_dic = {"bert": [BertTokenizer,"bert-base-uncased"]}
-        local_directory = "/home/avi/.cache/huggingface/hub/models--bert-base-uncased/snapshots/86b5e0934494bd15c9632b12f734a8a67f723594"
-        pre_train_tokenizer, checkpoint = pre_trained_dic[self.args.pre_train]
-        tokenizer = pre_train_tokenizer.from_pretrained(local_directory) #checkpoint)
-        # tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+        tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         print("Tokenizer Loaded!")
         return tokenizer
 
@@ -86,7 +75,6 @@ class Experiments(object):
 
 
     def train_one_step(self,it,encode_parent, encode_child,encode_negative_parents):
-
         self.model.train()
         self.optimizer.zero_grad()
 
@@ -97,25 +85,14 @@ class Experiments(object):
         return loss
 
 
-    def train(self):
+    def train(self,checkpoint=None):
         time_tracker = []
         test_acc = test_mrr = test_wu_p = 0
         old_test_acc = old_test_mrr = old_test_wu_p = 0
-
-        limit=1
-        if(self.args.dataset=='environment'):
-            limit=0.48
-            if self.args.complex:
-                limit = 0.57
-        elif self.args.dataset=='science':
-            limit = 0.56
-            if self.args.complex:
-                limit = 0.76
-        elif self.args.dataset=='food':
-            limit=0.45
-            if self.args.complex:
-                limit=0.56
         
+        if checkpoint:
+            self.model.load_state_dict(torch.load(f"{checkpoint}"))
+
         for epoch in tqdm(range(self.args.epochs)):
             epoch_time = time.time()
             train_loss = []
@@ -165,8 +142,6 @@ class Experiments(object):
             torch.save(self.model.state_dict(), os.path.join("../result",self.args.dataset,"train","exp_model_"+self.exp_setting+"_"+str(epoch)+".checkpoint")) 
             if epoch:
                 os.remove(os.path.join("../result",self.args.dataset,"train","exp_model_"+self.exp_setting+"_"+str((epoch-1))+".checkpoint"))
-            if test_acc>=limit:
-                break
 
     def predict(self, tag=None, path=None):
         # state_dict = self.model.state_dict()

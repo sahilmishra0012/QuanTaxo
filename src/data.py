@@ -6,9 +6,7 @@ from torch.utils.data import Dataset, DataLoader
 
 
 class Data_TRAIN(Dataset):
-    
     def __init__(self,args,tokenizer):
-        
         super(Data_TRAIN, self).__init__()
 
         self.args = args
@@ -35,24 +33,15 @@ class Data_TRAIN(Dataset):
 
         self.encode_all = self.generate_all_token_ids(self.tokenizer)
 
-
-
     def __load_data__(self,dataset):
-        
         with open(os.path.join("../data/",dataset,"processed","taxonomy_data_"+str(self.args.expID)+"_.pkl"),"rb") as f:
             data = pkl.load(f)
         
         return data
 
 
-
-
     def generate_all_token_ids(self,tokenizer):
-
         if self.args.word:
-            # all_concepts = [self.id_concept[cid] for cid in self.concept_set]
-            # all_context = [self.id_context[cid] for cid in self.concept_set]
-            # all_nodes_context = [" [SEP] ".join(list(elem)) for elem in zip(all_concepts,all_context)]
             all_nodes_context = [self.id_context[cid].replace(":"," [SEP] ") for cid in self.concept_set]
         else:
             all_nodes_context = [self.id_context[cid] for cid in self.concept_set]
@@ -69,11 +58,7 @@ class Data_TRAIN(Dataset):
                         'attention_mask' : a_attention_mask} 
         return encode_all
 
-
-
-
     def index_token_ids(self,encode_dic,index):
-
         input_ids,token_type_ids,attention_mask = encode_dic["input_ids"],encode_dic["token_type_ids"],encode_dic["attention_mask"]
         
         res_dic = {'input_ids' : input_ids[index], 
@@ -84,7 +69,6 @@ class Data_TRAIN(Dataset):
 
 
     def generate_parent_child_token_ids(self,index):
-
         child_id,parent_id,negative_parent_id = self.train_child_parent_negative_parent_triple[index]
         encode_child = self.index_token_ids(self.encode_all,child_id)
         encode_parent = self.index_token_ids(self.encode_all,parent_id)
@@ -92,27 +76,16 @@ class Data_TRAIN(Dataset):
 
         return encode_parent, encode_child,encode_negative_parents
 
-
     def __getitem__(self, index):
-
         encode_parent, encode_child,encode_negative_parents = self.generate_parent_child_token_ids(index)
         return encode_parent, encode_child,encode_negative_parents
 
-
-
     def __len__(self):
-        
         return len(self.train_child_parent_negative_parent_triple)
 
-
-
-
 class Data_TEST(Dataset):
-    
     def __init__(self,args,tokenizer):
-        
         super(Data_TEST, self).__init__()
-
         self.args = args
         self.dataset = args.dataset
         print("Dataset: {}".format(self.dataset))
@@ -136,17 +109,12 @@ class Data_TEST(Dataset):
 
 
     def __load_data__(self,dataset):
-        
         with open(os.path.join("../data/",dataset,"processed","taxonomy_data_"+str(self.args.expID)+"_.pkl"),"rb") as f:
             data = pkl.load(f)
         
         return data
 
-
-
-
     def generate_all_token_ids(self,tokenizer):
-
         if self.args.word:
             all_nodes_context = [self.id_context[cid].replace(":"," [SEP] ") for cid in self.concept_set]
         else:
@@ -164,7 +132,6 @@ class Data_TEST(Dataset):
                         'attention_mask' : a_attention_mask} 
 
         return encode_all
-
 
 
     def generate_test_token_ids(self,tokenizer, test_concepts_id):
@@ -185,10 +152,7 @@ class Data_TEST(Dataset):
 
         return encode_test
 
-
-
     def index_token_ids(self,encode_dic,index):
-
         input_ids,token_type_ids,attention_mask = encode_dic["input_ids"],encode_dic["token_type_ids"],encode_dic["attention_mask"]
         
         res_dic = {'input_ids' : input_ids[index], 
@@ -198,29 +162,16 @@ class Data_TEST(Dataset):
 
         return res_dic
 
-
-
     def __getitem__(self, index):
-
         candidate_ids = self.train_concept_set[index]
-
         encode_candidate = self.index_token_ids(self.encode_all,candidate_ids)
-
         return encode_candidate
 
-
-
     def __len__(self):
-
         return len(self.train_concept_set)
 
 
-
-
-
-
 def load_data(args, tokenizer,flag):
-
     if flag in set(['test','val']) :
         shuffle_flag = False; drop_last = False; batch_size = 1; 
         data_set = Data_TEST(args,tokenizer)
@@ -228,7 +179,6 @@ def load_data(args, tokenizer,flag):
         shuffle_flag = True; drop_last = False; batch_size = args.batch_size; 
         data_set = Data_TRAIN(args,tokenizer)
     
-    # torch.manual_seed(42) # For Reproducibility
     print("Loading ", flag, len(data_set))
     data_loader = DataLoader(
         data_set,
