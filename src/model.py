@@ -29,8 +29,9 @@ class QuanTaxo(nn.Module):
         self.test_gt_id = self.data["test_gt_id"]
 
         self.pre_train_model = self.__load_pre_trained__()
-        self.mixwt = NormalisedWeights(input_dim=128, mixturetype=self.args.mixture)
-        self.logits = MLP_VEC(input_dim=(768+1),hidden=self.args.hidden,output_dim=1)
+        self.mixwt = NormalisedWeights(input_dim=self.args.padmaxlen, mixturetype=self.args.mixture)
+        self.dimreduce = nn.Linear(in_features=768,out_features=self.args.matrixsize,bias=False)        
+        self.logits = MLP_VEC(input_dim=(self.args.matrixsize+1),hidden=self.args.hidden,output_dim=1)
         self.dropout = nn.Dropout(self.args.dropout)
         self.classfn_loss = nn.BCELoss()
 
@@ -44,11 +45,6 @@ class QuanTaxo(nn.Module):
         model = BertModel.from_pretrained("bert-base-uncased")
         print("Model Loaded!")
         return model
-
-    def get_bert_logits(self, enc_q, enc_cand):
-        xfeat = torch.cat((enc_q, enc_cand),dim=-1)
-        logits = self.bert_logits(xfeat)
-        return logits
     
     def get_logits(self, norm_child, norm_parent):
         mat = torch.matmul(norm_child, norm_parent)
@@ -57,43 +53,37 @@ class QuanTaxo(nn.Module):
         logits = self.logits(xfeat)
         return logits
 
-    def get_density_matrices(self, encode_inputs, printit=None):
+    def get_density_matrices(self, encode_inputs, printit=None,r=None):
         cls = self.pre_train_model(**encode_inputs)
         if self.args.mixture is not None:
             output = cls[0]
+            if(self.args.matrixsize!=768):
+                output=self.dimreduce(output)
             weights = self.mixwt(output)
-            if printit:
-                np.savetxt("weights.csv",weights.cpu(),delimiter=",",fmt="%.4e")
             weighted_sum = torch.einsum('bik,bil,i->bkl',output,output, weights)
-            if self.args.unitary:
-                weighted_sum = self.get_unit_trace(weighted_sum)
             return weighted_sum
         else:
             output = self.dropout(cls[0][:, 0, :]) # Extract CLS embedding for all elements in the batch
-            if self.args.pooled:
-                pooled = cls[1]
-                output = self.dropout(pooled)
-
+            if(self.args.matrixsize!=768):
+                output=self.dimreduce(output)
             dens_mat = torch.einsum('bi,bj->bij', output, output) # Outer product to get the matrices rho_a
-            if self.args.unitary:
-                dens_mat = self.get_unit_trace(dens_mat)
             return dens_mat
 
     def classfn_score(self, norm_query, norm_candidate):
         return self.get_logits(norm_query, norm_candidate)
 
     def forward(self,encode_parent=None,encode_child=None,encode_negative_parents=None,flag="trace"):
+
         par_cls = self.get_density_matrices(encode_parent)
         child_cls = self.get_density_matrices(encode_child)
         neg_par_cls = self.get_density_matrices(encode_negative_parents)
 
-        if flag=="trace":
-            positive_logits = self.get_logits(child_cls, par_cls)
-            negative_logits = self.get_logits(child_cls,neg_par_cls)
-            ones = torch.ones_like(positive_logits)
-            zeros = torch.zeros_like(negative_logits)
-            positive_loss = self.classfn_loss(positive_logits,ones)
-            negative_loss = self.classfn_loss(negative_logits,zeros)
+        positive_logits = self.get_logits(child_cls, par_cls)
+        negative_logits = self.get_logits(child_cls,neg_par_cls)
+        ones = torch.ones_like(positive_logits)
+        zeros = torch.zeros_like(negative_logits)
+        positive_loss = self.classfn_loss(positive_logits,ones)
+        negative_loss = self.classfn_loss(negative_logits,zeros)
 
         loss = positive_loss + negative_loss
 

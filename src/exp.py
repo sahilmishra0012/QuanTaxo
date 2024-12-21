@@ -17,6 +17,7 @@ import wandb
 # os.environ["WANDB_MODE"] = "offline"
 
 class Experiments(object):
+
     def __init__(self,args):
         super(Experiments,self).__init__()
         
@@ -32,7 +33,7 @@ class Experiments(object):
         
         self.optimizer = self._select_optimizer()
         self._set_device()
-        self.exp_setting= "_".join([str(elem) for elem in [self.args.pre_train,self.args.dataset,self.args.expID,self.args.epochs,self.args.batch_size,self.args.mixture if self.args.mixture else "superposn", self.args.lr,self.args.score,"complex" if self.args.complex else "real"]])
+        self.exp_setting= "_".join([str(elem) for elem in [self.args.pre_train,self.args.dataset,self.args.expID,self.args.epochs,self.args.batch_size,self.args.mixture if self.args.mixture else "superposn", self.args.lr,"complex" if self.args.complex else "real"]])
         
         setting={
             "pre_train":self.args.pre_train,
@@ -43,20 +44,22 @@ class Experiments(object):
             "lr":self.args.lr,
             "hidden":self.args.hidden,
             "mixture":self.args.mixture if self.args.mixture else "superposn",
-            "score_fn":self.args.score,
-            "complex":self.args.complex
+            "complex":self.args.complex,
+            "matrixsize":self.args.matrixsize
         }
         print(setting)
 
         if self.args.wandb:
             wandb.init(project='quantum',config = setting,entity='taxo_iitd')
+        # else:
+        #     os.environ["WANDB_MODE"] = "offline"
+        #     wandb.init(project='quantum',config = setting,entity='taxo_iitd')
 
 
     def __load_tokenizer__(self):
         tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         print("Tokenizer Loaded!")
         return tokenizer
-
 
     def _select_optimizer(self):
         parameters = [{"params": [p for n, p in self.model.named_parameters()],
@@ -73,12 +76,12 @@ class Experiments(object):
         if self.args.cuda:
             self.model = self.model.cuda()
 
-
     def train_one_step(self,it,encode_parent, encode_child,encode_negative_parents):
+
         self.model.train()
         self.optimizer.zero_grad()
 
-        loss = self.model(encode_parent, encode_child,encode_negative_parents, flag=self.args.score)
+        loss = self.model(encode_parent, encode_child,encode_negative_parents)
         loss.backward()
         self.optimizer.step()
 
@@ -157,14 +160,16 @@ class Experiments(object):
         with torch.no_grad():
             score_list = []
             gt_label = self.test_set.test_gt_id
-            query = self.model.get_density_matrices(self.test_set.encode_query, printit=tag)
+            query = self.model.get_density_matrices(self.test_set.encode_query)
             candidates = []
+            
             for j, (encode_candidate) in enumerate(self.test_loader):
                 candidate_center = self.model.get_density_matrices(encode_candidate)
                 candidates.append(candidate_center)
             candidates = torch.cat(candidates,0)
             num_query=len(query)
             num_candidate = len(candidates)
+            
             for i in tqdm(range(num_query), desc="Validation Queries", total = num_query):
                 query_duplicated = [query[i].unsqueeze(dim=0) for _ in range(num_candidate)]
                 query_duplicated = torch.cat(query_duplicated,0)
@@ -173,7 +178,9 @@ class Experiments(object):
             score_list = torch.stack(score_list,0)
             sorted_scores, indices = score_list.squeeze().sort(dim=1,descending=True)
             print(sorted_scores[:,:5])
-            test_metrics = metrics(indices, gt_label, self.train_set.train_concept_set, self.test_set.path2root)
+            topmatch = indices[:,0]
+            lowmatch = indices[:,-1]
+            test_metrics = metrics(indices, gt_label, self.train_set.train_concept_set, self.test_set.path2root, self.test_set.id_concept,self.train_set.id_concept,self.test_set.test_concepts_id,sorted_scores)
 
         if(tag=="test"):
             print('acc:{:.05f}'.format(test_metrics["Acc"]),
@@ -187,3 +194,28 @@ class Experiments(object):
             return
         else:
             return test_metrics
+        
+    # def get_pred_matrices(self,tag=None,path=None):
+    #     if(tag=="test"):
+    #         if path:
+    #             self.model.load_state_dict(torch.load(f"{path}"))
+    #         else:
+    #             self.model.load_state_dict(torch.load(f"/home/avi/BoxTaxo_QLM/result/{self.args.dataset}/model/exp_model_{self.exp_setting}.checkpoint"))
+        
+    #     self.model.eval()
+    #     with torch.no_grad():
+    #         query = self.model.get_density_matrices(self.test_set.encode_query)
+    #         numq = query.shape[0]
+    #         for i in range(numq):
+    #             fname = f"matrix/density_matrix_q_{i}.csv"
+    #             np.savetxt(fname,query[i].cpu(),delimiter=",",fmt="%.4e")
+    #         candidates = []
+            
+    #         for j, (encode_candidate) in enumerate(self.test_loader):
+    #             candidate_center = self.model.get_density_matrices(encode_candidate)
+    #             fname = f"matrix/density_matrix_c_{j}.csv"
+    #             np.savetxt(fname,candidate_center[0].cpu(),delimiter=",",fmt="%.4e")
+    #             candidates.append(candidate_center)
+    #         candidates = torch.cat(candidates,0)
+        
+    #     print("Matrices stored!")
