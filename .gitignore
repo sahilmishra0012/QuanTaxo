@@ -1,3 +1,12 @@
 src/wandb/
-old_src/
 src/__pycache__/
+old_src/
+new_src/
+src/*.txt
+src/weights*
+src/main_cont_train.py
+src/wordnet_data.py
+src/trial.py
+
+old_data/
+fin_details.zip

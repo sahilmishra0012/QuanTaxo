@@ -5,13 +5,13 @@ import numpy as np
 import sys
 import torch.nn as nn
 from utils import *
-from layers import MLP_VEC, NormalisedWeights
+from layers import MLP_VEC, NormalisedWeights, PhaseEmbeddings
 from transformers import BertModel
 
 
-class QuanTaxo(nn.Module):
+class ComplexQTaxo(nn.Module):
     def __init__(self,args,tokenizer):
-        super(QuanTaxo, self).__init__()
+        super(ComplexQTaxo, self).__init__()
 
         self.args = args
         self.data = self.__load_data__(self.args.dataset)
@@ -29,8 +29,9 @@ class QuanTaxo(nn.Module):
         self.test_gt_id = self.data["test_gt_id"]
 
         self.pre_train_model = self.__load_pre_trained__()
+        self.phaselayer = PhaseEmbeddings(embed_dim=self.args.matrixsize)
         self.mixwt = NormalisedWeights(input_dim=self.args.padmaxlen, mixturetype=self.args.mixture)
-        self.dimreduce = nn.Linear(in_features=768,out_features=self.args.matrixsize,bias=False)        
+        self.dimreduce = nn.Linear(in_features=768,out_features=self.args.matrixsize,bias=False)
         self.logits = MLP_VEC(input_dim=(self.args.matrixsize+1),hidden=self.args.hidden,output_dim=1)
         self.dropout = nn.Dropout(self.args.dropout)
         self.classfn_loss = nn.BCELoss()
@@ -38,7 +39,6 @@ class QuanTaxo(nn.Module):
     def __load_data__(self,dataset):
         with open(os.path.join("../data/",dataset,"processed","taxonomy_data_"+str(self.args.expID)+"_.pkl"),"rb") as f:
             data = pkl.load(f)
-        
         return data
 
     def __load_pre_trained__(self):
@@ -50,30 +50,33 @@ class QuanTaxo(nn.Module):
         mat = torch.matmul(norm_child, norm_parent)
         trace = mat.diagonal(dim1=-2, dim2=-1).sum(dim=-1)
         xfeat = torch.cat((trace.view(len(trace),1), mat.diagonal(dim1=-2,dim2=-1)), dim=-1)
-        logits = self.logits(xfeat)
+        logits = self.logits(xfeat.abs())
         return logits
 
-    def get_density_matrices(self, encode_inputs, printit=None,r=None):
+    def get_density_matrices(self, encode_inputs, printit=None):
         cls = self.pre_train_model(**encode_inputs)
+        phase = self.phaselayer()
         if self.args.mixture is not None:
             output = cls[0]
             if(self.args.matrixsize!=768):
+                # Reduce the length of embeddings from 768 to self.args.matrixsize
                 output=self.dimreduce(output)
+            output = output * phase.view(1,1,self.args.matrixsize) # Append the phases with each of the 
             weights = self.mixwt(output)
-            weighted_sum = torch.einsum('bik,bil,i->bkl',output,output, weights)
+            weighted_sum = torch.einsum('bik,bil,i->bkl',output,output.conj(), weights)
             return weighted_sum
         else:
             output = self.dropout(cls[0][:, 0, :]) # Extract CLS embedding for all elements in the batch
             if(self.args.matrixsize!=768):
                 output=self.dimreduce(output)
-            dens_mat = torch.einsum('bi,bj->bij', output, output) # Outer product to get the matrices rho_a
+            output = output*phase.view(1,self.args.matrixsize)
+            dens_mat = torch.einsum('bi,bj->bij', output, output.conj()) # Outer product to get the matrices rho_a
             return dens_mat
 
     def classfn_score(self, norm_query, norm_candidate):
         return self.get_logits(norm_query, norm_candidate)
 
     def forward(self,encode_parent=None,encode_child=None,encode_negative_parents=None,flag="trace"):
-
         par_cls = self.get_density_matrices(encode_parent)
         child_cls = self.get_density_matrices(encode_child)
         neg_par_cls = self.get_density_matrices(encode_negative_parents)
@@ -84,8 +87,7 @@ class QuanTaxo(nn.Module):
         zeros = torch.zeros_like(negative_logits)
         positive_loss = self.classfn_loss(positive_logits,ones)
         negative_loss = self.classfn_loss(negative_logits,zeros)
-
-        loss = positive_loss + negative_loss
+        loss = positive_loss+negative_loss
 
         return loss
     

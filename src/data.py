@@ -34,7 +34,21 @@ class Data_TRAIN(Dataset):
         print ("Training samples: {}".format(len(self.train_child_parent_negative_parent_triple)))
 
         self.encode_all = self.generate_all_token_ids(self.tokenizer)
-
+        # l=10000000
+        # print(type(self.train_child_parent_negative_parent_triple))
+        # for key in self.train_child_list:
+        #     # val = self.train_child_parent_negative_parent_triple[key]
+        #     val = self.train_negative_parent_dict[key]
+        #     print(f"{key}: {self.id_concept[key]}")
+        #     # print(len(self.train_parent_list))
+        #     print(len(val))
+        #     # par = self.child_parent_pair[key][1]
+        #     # print(f"True parent is: ",self.id_concept[par])
+        #     print(f"{self.id_concept[key]}: {val}")
+        #     if(len(val)<l):
+        #         l = len(val)
+        # print("Minimum length is: ",l)
+        # sys.exit(0)
 
 
     def __load_data__(self,dataset):
@@ -94,8 +108,20 @@ class Data_TRAIN(Dataset):
 
 
     def __getitem__(self, index):
-
+        # print("Index asked for: ",index)
         encode_parent, encode_child,encode_negative_parents = self.generate_parent_child_token_ids(index)
+        
+        # print("Encoded parent:")
+        # for elem in encode_parent:
+        #     print(f"{elem}: {encode_parent[elem]}")
+        # print("Encoded child:")
+        # for elem in encode_child:
+        #     print(f"{elem}: {encode_child[elem]}")
+        
+        # print("Encoded negative parent:")
+        # for elem in encode_negative_parents:
+        #     print(f"{elem}: {encode_negative_parents[elem]}")
+        # sys.exit(0)
         return encode_parent, encode_child,encode_negative_parents
 
 
@@ -195,7 +221,6 @@ class Data_TEST(Dataset):
                         'token_type_ids' : token_type_ids[index], 
                         'attention_mask' : attention_mask[index]}
 
-
         return res_dic
 
 
@@ -203,15 +228,10 @@ class Data_TEST(Dataset):
     def __getitem__(self, index):
 
         candidate_ids = self.train_concept_set[index]
-
         encode_candidate = self.index_token_ids(self.encode_all,candidate_ids)
-
         return encode_candidate
 
-
-
     def __len__(self):
-
         return len(self.train_concept_set)
 
 
@@ -222,7 +242,7 @@ class Data_TEST(Dataset):
 def load_data(args, tokenizer,flag):
 
     if flag in set(['test','val']) :
-        shuffle_flag = False; drop_last = False; batch_size = 1; 
+        shuffle_flag = False; drop_last = False; batch_size = 4; #1 by default 
         data_set = Data_TEST(args,tokenizer)
     else:
         shuffle_flag = True; drop_last = False; batch_size = args.batch_size; 
