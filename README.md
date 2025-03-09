@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # QuanTaxoMania
 
 ### Quantum Representation of Taxonomy
